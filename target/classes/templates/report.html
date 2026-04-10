@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>FinControl - Relatório</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <div class="app">
+        <aside class="sidebar">
+            <div style="font-size: 22px; font-weight: 700; margin-bottom: 24px;">💰 FinControl</div>
+            <nav>
+                <a href="/">📊 Dashboard</a>
+                <a href="/transactions">💳 Transações</a>
+                <a href="/report" class="active">📋 Relatório</a>
+            </nav>
+        </aside>
+
+        <main class="main">
+            <header style="margin-bottom: 32px;">
+                <h1>📋 Relatório de Transações</h1>
+                <p style="color: var(--muted);">Análise estatística de receitas e despesas</p>
+            </header>
+
+            <div class="cards">
+                <div class="card income">
+                    <div style="color: var(--muted); font-size: 12px; text-transform: uppercase; font-weight: 500;">
+                        📈 Total Receitas
+                    </div>
+                    <div class="value" id="reportIncome">R$ 0,00</div>
+                </div>
+
+                <div class="card expense">
+                    <div style="color: var(--muted); font-size: 12px; text-transform: uppercase; font-weight: 500;">
+                        📉 Total Despesas
+                    </div>
+                    <div class="value" id="reportExpense">R$ 0,00</div>
+                </div>
+
+                <div class="card">
+                    <div style="color: var(--muted); font-size: 12px; text-transform: uppercase; font-weight: 500;">
+                        💳 Saldo Total
+                    </div>
+                    <div class="value" id="reportBalance">R$ 0,00</div>
+                </div>
+            </div>
+
+            <div style="background: var(--card); border-radius: 12px; padding: 24px; margin-bottom: 24px;">
+                <h3>Distribuição por Categoria</h3>
+                <div style="position: relative; height: 300px;">
+                    <canvas id="categoryChart"></canvas>
+                </div>
+            </div>
+
+            <div style="background: var(--card); border-radius: 12px; padding: 24px;">
+                <h3>Receitas vs Despesas</h3>
+                <div style="position: relative; height: 300px;">
+                    <canvas id="incomeExpenseChart"></canvas>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="/js/app.js"></script>
+    <script>
+        let categoryChart, incomeExpenseChart;
+
+        async function loadReport() {
+            try {
+                const transactions = await apiCall('/api/transactions');
+                
+                const income = transactions.filter(t => t.type === 'income').reduce((s, t) => s + t.value, 0);
+                const expense = transactions.filter(t => t.type === 'expense').reduce((s, t) => s + t.value, 0);
+
+                document.getElementById('reportIncome').textContent = formatCurrency(income);
+                document.getElementById('reportExpense').textContent = formatCurrency(expense);
+                document.getElementById('reportBalance').textContent = formatCurrency(income - expense);
+
+                // Preparar dados para gráfico de categorias
+                const categoryData = {};
+                transactions.forEach(t => {
+                    if (!categoryData[t.category]) {
+                        categoryData[t.category] = 0;
+                    }
+                    categoryData[t.category] += t.value;
+                });
+
+                const categories = Object.keys(categoryData);
+                const values = Object.values(categoryData);
+
+                // Gráfico de Categorias
+                const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+                if (categoryChart) categoryChart.destroy();
+                categoryChart = new Chart(categoryCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: categories,
+                        datasets: [{
+                            data: values,
+                            backgroundColor: [
+                                '#10b981', '#ef4444', '#f59e0b', '#7c3aed', '#3b82f6',
+                                '#ec4899', '#14b8a6', '#f97316', '#06b6d4', '#8b5cf6'
+                            ]
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { labels: { color: 'var(--text)' } }
+                        }
+                    }
+                });
+
+                // Gráfico de Receitas vs Despesas
+                const incomeExpenseCtx = document.getElementById('incomeExpenseChart').getContext('2d');
+                if (incomeExpenseChart) incomeExpenseChart.destroy();
+                incomeExpenseChart = new Chart(incomeExpenseCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Receitas', 'Despesas', 'Saldo'],
+                        datasets: [{
+                            label: 'Valores (R$)',
+                            data: [income, expense, income - expense],
+                            backgroundColor: ['#10b981', '#ef4444', '#7c3aed']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { labels: { color: 'var(--text)' } }
+                        },
+                        scales: {
+                            y: { ticks: { color: 'var(--text)' } },
+                            x: { ticks: { color: 'var(--text)' } }
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('Erro ao carregar relatório:', error);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadReport);
+    </script>
+</body>
+</html>

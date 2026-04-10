@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>FinControl - Dashboard</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <div class="app">
+        <aside class="sidebar">
+            <div style="font-size: 22px; font-weight: 700; margin-bottom: 24px;">💰 FinControl</div>
+            <nav>
+                <a href="/" class="active">📊 Dashboard</a>
+                <a href="/transactions">💳 Transações</a>
+                <a href="/report">📋 Relatório</a>
+            </nav>
+        </aside>
+
+        <main class="main">
+            <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
+                <div>
+                    <h1>📊 Dashboard</h1>
+                    <p style="color: var(--muted);">Visão geral das suas finanças</p>
+                </div>
+                <div style="display: flex; gap: 12px;">
+                    <button class="btn" onclick="window.print()">🖨️ Imprimir</button>
+                    <button class="btn primary" onclick="openModal()">➕ Nova Transação</button>
+                </div>
+            </header>
+
+            <div class="cards">
+                <div class="card income">
+                    <div style="color: var(--muted); font-size: 12px; text-transform: uppercase; font-weight: 500;">
+                        📈 Receitas
+                    </div>
+                    <div class="value" id="totInc">R$ 0,00</div>
+                </div>
+
+                <div class="card expense">
+                    <div style="color: var(--muted); font-size: 12px; text-transform: uppercase; font-weight: 500;">
+                        📉 Despesas
+                    </div>
+                    <div class="value" id="totExp">R$ 0,00</div>
+                </div>
+
+                <div class="card">
+                    <div style="color: var(--muted); font-size: 12px; text-transform: uppercase; font-weight: 500;">
+                        💳 Saldo
+                    </div>
+                    <div class="value" id="bal">R$ 0,00</div>
+                </div>
+            </div>
+
+            <div style="background: var(--card); border-radius: 12px; padding: 24px;">
+                <h3>🕐 Transações Recentes</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Descrição</th>
+                            <th>Categoria</th>
+                            <th>Tipo</th>
+                            <th>Valor</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="txList">
+                        <tr><td colspan="6" style="text-align: center; padding: 32px;">Carregando...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <h3 id="modalTitle" style="margin-bottom: 24px;">➕ Nova Transação</h3>
+            <form id="txForm" onsubmit="saveTransaction(event)">
+                <div class="form-group">
+                    <label>Tipo *</label>
+                    <select id="type" class="input" required>
+                        <option value="income">📈 Receita</option>
+                        <option value="expense">📉 Despesa</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Descrição *</label>
+                    <input type="text" id="desc" class="input" placeholder="Ex: Venda de produto" required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Valor (R$) *</label>
+                        <input type="number" id="val" class="input" step="0.01" min="0" placeholder="0,00" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Data *</label>
+                        <input type="date" id="date" class="input" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Categoria *</label>
+                    <input type="text" id="cat" class="input" placeholder="Ex: Vendas, Alimentação" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Notas</label>
+                    <textarea id="notes" class="input" placeholder="Observações adicionais (opcional)"></textarea>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn" onclick="closeModal()">Cancelar</button>
+                    <button type="submit" class="btn primary" id="submitBtn">💾 Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="/js/app.js"></script>
+</body>
+</html>

@@ -70,7 +70,7 @@ function deleteDesc() {
         alert('Selecione uma descrição para deletar');
         return;
     }
-    if (!confirm(`⚠️ Deletar "${current}"?`)) return;
+    if (!confirm(`⚠️ Deletar \"${current}\"?`)) return;
     
     let descs = getDescriptions();
     descs = descs.filter(d => d !== current);
@@ -114,7 +114,7 @@ function deleteCat() {
         alert('Selecione uma categoria para deletar');
         return;
     }
-    if (!confirm(`⚠️ Deletar "${current}"?`)) return;
+    if (!confirm(`⚠️ Deletar \"${current}\"?`)) return;
     
     let cats = getCategories();
     cats = cats.filter(c => c !== current);
